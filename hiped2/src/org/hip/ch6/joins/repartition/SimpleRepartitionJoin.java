@@ -55,6 +55,7 @@ public class SimpleRepartitionJoin extends Configured implements Tool{
         Configuration conf = super.getConf();
         
         Job job = new Job(conf);
+        
         job.setJarByClass(SimpleRepartitionJoin.class);
         
         MultipleInputs.addInputPath(job, usersPath, TextInputFormat.class, UserMap.class);
