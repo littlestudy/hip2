@@ -22,17 +22,22 @@ import com.google.common.collect.Lists;
 
 public class StreamingRepartitionJoin extends BaseMapReduce{	
 
+	private static String jobId;
+	private static Configuration conf;
+	
 	public StreamingRepartitionJoin() {
 		super(StreamingRepartitionJoin.class);
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {		
 		args = new String[] {
             "hdfs://master:9000/user/hadoop/data/users.txt",
             "hdfs://master:9000/user/hadoop/data/user-logs.txt",
-            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin"
+            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin13"
         };  
-		exec(new StreamingRepartitionJoin(), args, ShowLog.IDENTITY);
+		StreamingRepartitionJoin s = new StreamingRepartitionJoin();
+		exec(s, args);
+		s.showLogInfo(jobId, conf, ShowLog.FULL);
 	}
 	
 	enum KeyFields{
@@ -74,7 +79,12 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		
 		FileOutputFormat.setOutputPath(job, outputPath);
 		
-		return job.waitForCompletion(true) ? 0 : 1;
+		if (job.waitForCompletion(true)){
+			jobId = job.getJobID().toString();
+			this.conf = conf;
+			return 0;
+		}
+		return 1;
 	}
 	
 	public static class UserMap extends Mapper<LongWritable, Text, Tuple, Tuple>{
