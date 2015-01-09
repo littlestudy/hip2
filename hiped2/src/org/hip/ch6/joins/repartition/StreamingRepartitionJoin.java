@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 public class StreamingRepartitionJoin extends BaseMapReduce{	
 
 	private static String jobId;
-	private static Configuration conf;
+	private static Configuration conf_;
 	
 	public StreamingRepartitionJoin() {
 		super(StreamingRepartitionJoin.class);
@@ -35,9 +35,9 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
             "hdfs://master:9000/user/hadoop/data/user-logs.txt",
             "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin13"
         };  
-		StreamingRepartitionJoin s = new StreamingRepartitionJoin();
-		exec(s, args);
-		s.showLogInfo(jobId, conf, ShowLog.FULL);
+		
+		exec(new StreamingRepartitionJoin(), args);
+		showLogInfo(jobId, conf_, ShowLog.FULL);
 	}
 	
 	enum KeyFields{
@@ -81,7 +81,7 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		
 		if (job.waitForCompletion(true)){
 			jobId = job.getJobID().toString();
-			this.conf = conf;
+			conf_ = conf;
 			return 0;
 		}
 		return 1;

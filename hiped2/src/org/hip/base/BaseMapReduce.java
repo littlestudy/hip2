@@ -1,8 +1,9 @@
 package org.hip.base;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.InputStreamReader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,7 +49,7 @@ public abstract class BaseMapReduce extends Configured implements Tool{
 		}
 	}
 	
-	public String showLogInfo(String jobId, Configuration conf, ShowLog show){
+	public static String showLogInfo(String jobId, Configuration conf, ShowLog show){
 		try {
 			Thread.sleep(3000);			
 		} catch (InterruptedException e1) {
@@ -57,9 +58,9 @@ public abstract class BaseMapReduce extends Configured implements Tool{
 		String pathStr = LOG_DIR + "application" + jobId.substring(3) + "/master_35132";		
 		Path logPath = new Path(pathStr);
 		try {
-			PrintStream ps = new PrintStream(System.out);
 			InputStream is = logPath.getFileSystem(conf).open(logPath);
-			IOUtils.copyBytes(is, ps, conf);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+			//IOUtils.copyBytes(is, os, conf);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
