@@ -10,7 +10,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -60,7 +59,7 @@ public abstract class BaseMapReduce extends Configured implements Tool{
 		try {
 			InputStream is = logPath.getFileSystem(conf).open(logPath);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			//IOUtils.copyBytes(is, os, conf);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
