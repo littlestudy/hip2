@@ -30,7 +30,7 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		args = new String[] {
             "hdfs://master:9000/user/hadoop/data/users.txt",
             "hdfs://master:9000/user/hadoop/data/user-logs.txt",
-            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin13"
+            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin7"
         };  
 		
 		exec(new StreamingRepartitionJoin(), args);  //////////////////////////////////////

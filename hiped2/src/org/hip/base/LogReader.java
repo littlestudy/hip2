@@ -26,6 +26,8 @@ public class LogReader extends Configured implements Tool{
 	
 	private static final Log LOG = LogFactory.getLog(LogReader.class); 	
 	private StringBuilder sb = new StringBuilder();
+	private FileSystem fileSystem;
+	private int waitingTime = 5;
 	
 	public enum ShowLogType{
 		NO, FULL, IDENTITY
@@ -60,24 +62,47 @@ public class LogReader extends Configured implements Tool{
 	private void showLog(String jobId, ShowLogType show) throws Exception {
 		Path logDir = new Path(LOG_DIR_ROOT + LOG_PREIFX + jobId.substring(3));
 		
+		fileSystem = logDir.getFileSystem(getConf());		
+		
+		if (fileSystem.exists(logDir))		
+			addInfo("Log direct: " + logDir.toString());
+		else
+			throw new Exception("Log direct does not exist.");		
+		
+		FileStatus[] status = null;
+		
+		int i = 0;
+		for (i = 0; i < waitingTime; i++){			
+			status = fileSystem.listStatus(logDir);			
+			
+			if (status.length > 0)
+				break;
+				
+			LOG.info("Wait for loading job's log(s)...");
+			Thread.sleep(1000);				
+		}
+		
+		if (i > 4)
+			throw new Exception("Waiting time exceeds 5 seconds.");
+		
 		switch (show) {
 		case NO:
 			LOG.info("Do not show the log(s).");
 			break;
 		case FULL:
-			showFullLog(logDir);
+			showFullLog(status);
 			break;	
 		case IDENTITY:
-			showIdentifidLog(logDir);
+			showIdentifidLog(status);
 			break;
 		default:
 			throw new Exception("Show Type is illegal.");
 		}
+		
+		setAllInfo();
 	}
 	
-	private void showIdentifidLog(Path logDir) throws IOException {
-		FileSystem fileSystem = logDir.getFileSystem(getConf());
-		FileStatus[] status = fileSystem.listStatus(logDir);		
+	private void showIdentifidLog(FileStatus[] status) throws IOException {	
 		for (FileStatus statu : status){
 			addInfo("Log File: " + statu.getPath().toString());
 			BufferedReader reader = new BufferedReader(new InputStreamReader(fileSystem.open(statu.getPath())));
@@ -91,12 +116,9 @@ public class LogReader extends Configured implements Tool{
 			}
 			addInfo();
 		}
-		setAllInfo();
 	}
 
-	private void showFullLog(Path logDir) throws IOException {
-		FileSystem fileSystem = logDir.getFileSystem(getConf());
-		FileStatus[] status = fileSystem.listStatus(logDir);		
+	private void showFullLog(FileStatus[] status) throws IOException {	
 		for (FileStatus statu : status){
 			addInfo("Log File: " + statu.getPath().toString());
 			BufferedReader reader = new BufferedReader(new InputStreamReader(fileSystem.open(statu.getPath())));
@@ -106,7 +128,6 @@ public class LogReader extends Configured implements Tool{
 			}
 			addInfo();
 		}
-		setAllInfo();
 	}
 
 	private void addInfo(String info){
@@ -118,6 +139,6 @@ public class LogReader extends Configured implements Tool{
 	}
 	
 	private void setAllInfo(){
-		LOG.info("log info \n\n" + sb.toString());
+		LOG.info("log info \n\n" + sb.toString());		
 	}
 }
