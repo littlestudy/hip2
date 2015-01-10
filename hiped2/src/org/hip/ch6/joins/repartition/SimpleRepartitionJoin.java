@@ -54,7 +54,7 @@ public class SimpleRepartitionJoin extends Configured implements Tool{
         
         Configuration conf = super.getConf();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         
         job.setJarByClass(SimpleRepartitionJoin.class);
         

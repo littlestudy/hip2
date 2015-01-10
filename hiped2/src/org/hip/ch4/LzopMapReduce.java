@@ -49,7 +49,7 @@ public class LzopMapReduce extends Configured implements Tool{
         conf.setClass("mapred.map.output.compression.codec",
                 LzoCodec.class, CompressionCodec.class);
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(LzopMapReduce.class);
         
         job.setMapperClass(Mapper.class);
@@ -87,7 +87,7 @@ public class LzopMapReduce extends Configured implements Tool{
             System.out.println("block[" + i + "] = " + index.getPosition(i));
         }
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setInputFormatClass(LzoTextInputFormat.class);
         LzoTextInputFormat inputFormat = new LzoTextInputFormat();
         TextInputFormat.setInputPaths(job, compressedFile);

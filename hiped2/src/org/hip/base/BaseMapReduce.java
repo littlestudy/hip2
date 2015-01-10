@@ -1,42 +1,72 @@
 package org.hip.base;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.PrintStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.hip.base.LogReader.ShowLogType;
 
 public abstract class BaseMapReduce extends Configured implements Tool{
-	private final Log LOG; 
-	private static final String LOG_IDENTITY = "----------";
-	private static final String LOG_DIR = "hdfs://master:9000/tmp/logs/hadoop/logs/";
 	
-	public enum ShowLog{
-		NO, FULL, IDENTITY
-	}
+	private final Log LOG; 
+		
+	public static String jobId_;
+	public static ShowLogType show_;
 	
 	public BaseMapReduce(Class<?> cls){
 		LOG = LogFactory.getLog(cls);
 	}
 	
 	public void info(String info){		
-		LOG.info(LOG_IDENTITY + info);
+		LOG.info(LogReader.LOG_IDENTITY + info);
 	}
 	
 	public static void exec(Tool tool, String[] args) throws Exception{
 		int res = ToolRunner.run(new Configuration(), tool, args);
+		saveJobId(jobId_, show_);
 		System.exit(res);
 	}
 	
-	public static class BaseReduce<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>{
+	public void setJobIdAndShowLog(String jobId, ShowLogType show){
+		jobId_ = jobId;
+		show_ = show;
+	}
+	
+	public static void saveJobId(String jobId, ShowLogType show){
+		PrintStream ps = null;
+		try {
+			ps = new PrintStream(LogReader.LOCAL_JOBID_FILE);
+			ps.println(LogReader.getJobIdInfo(jobId, show));
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			IOUtils.closeStream(ps);
+		}		
+	}	
+	
+	public static class BaseMapper <KEYIN, VALUEIN, KEYOUT, VALUEOUT> 
+			extends Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>{
+		private final Log LOG;
+		
+		public BaseMapper(Class<?> cls){
+			LOG = LogFactory.getLog(cls);
+		}
+		
+		public void info(String info){		
+			LOG.info(LogReader.LOG_IDENTITY + info);
+		}
+	}
+	
+	public static class BaseReduce<KEYIN, VALUEIN, KEYOUT, VALUEOUT> 
+			extends Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT>{
 		private final Log LOG;
 		
 		public BaseReduce(Class<?> cls){
@@ -44,26 +74,7 @@ public abstract class BaseMapReduce extends Configured implements Tool{
 		}
 		
 		public void info(String info){		
-			LOG.info(LOG_IDENTITY + info);
+			LOG.info(LogReader.LOG_IDENTITY + info);
 		}
 	}
-	
-	public static String showLogInfo(String jobId, Configuration conf, ShowLog show){
-		try {
-			Thread.sleep(3000);			
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-		String pathStr = LOG_DIR + "application" + jobId.substring(3) + "/master_35132";		
-		Path logPath = new Path(pathStr);
-		try {
-			InputStream is = logPath.getFileSystem(conf).open(logPath);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return pathStr;
-	}
-	
 }

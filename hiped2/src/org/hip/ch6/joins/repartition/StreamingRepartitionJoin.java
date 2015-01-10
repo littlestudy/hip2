@@ -8,11 +8,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.hip.base.BaseMapReduce;
+import org.hip.base.LogReader.ShowLogType;
 import org.hip.ch6.joins.User;
 import org.hip.ch6.joins.UserLog;
 import org.htuple.ShuffleUtils;
@@ -21,9 +21,6 @@ import org.htuple.Tuple;
 import com.google.common.collect.Lists;
 
 public class StreamingRepartitionJoin extends BaseMapReduce{	
-
-	private static String jobId;
-	private static Configuration conf_;
 	
 	public StreamingRepartitionJoin() {
 		super(StreamingRepartitionJoin.class);
@@ -33,11 +30,10 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		args = new String[] {
             "hdfs://master:9000/user/hadoop/data/users.txt",
             "hdfs://master:9000/user/hadoop/data/user-logs.txt",
-            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin13"
+            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin12"
         };  
 		
 		exec(new StreamingRepartitionJoin(), args);
-		showLogInfo(jobId, conf_, ShowLog.FULL);
 	}
 	
 	enum KeyFields{
@@ -80,19 +76,22 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		FileOutputFormat.setOutputPath(job, outputPath);
 		
 		if (job.waitForCompletion(true)){
-			jobId = job.getJobID().toString();
-			conf_ = conf;
+			setJobIdAndShowLog(job.getJobID().toString(), ShowLogType.IDENTITY);
 			return 0;
 		}
 		return 1;
 	}
 	
-	public static class UserMap extends Mapper<LongWritable, Text, Tuple, Tuple>{
+	public static class UserMap extends BaseMapper<LongWritable, Text, Tuple, Tuple>{
+		public UserMap() {
+			super(UserMap.class);
+		}
+
 		@Override
 		protected void map(LongWritable key, Text value, Context context)
 				throws IOException, InterruptedException {
 			User user = User.fromText(value);
-			
+			info("UserMap.map");
 			Tuple outputKey = new Tuple();
 			outputKey.setString(KeyFields.USER, user.getName());
 			outputKey.setInt(KeyFields.DATASET, USERS);
@@ -105,12 +104,16 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		}
 	}
 	
-	public static class UserLogMap extends Mapper<LongWritable, Text, Tuple, Tuple>{
+	public static class UserLogMap extends BaseMapper<LongWritable, Text, Tuple, Tuple>{
+		public UserLogMap() {
+			super(UserLogMap.class);
+		}
+
 		@Override
 		protected void map(LongWritable key, Text value, Context context)
 				throws IOException, InterruptedException {
 			UserLog userLog = UserLog.fromText(value);
-			
+			info("UserLogMap.map");
 			Tuple outputKey = new Tuple();
 			outputKey.setString(KeyFields.USER, userLog.getName());
 			outputKey.setInt(KeyFields.DATASET, USER_LOGS);
