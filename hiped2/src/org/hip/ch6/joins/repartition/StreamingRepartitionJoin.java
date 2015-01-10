@@ -30,10 +30,10 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		args = new String[] {
             "hdfs://master:9000/user/hadoop/data/users.txt",
             "hdfs://master:9000/user/hadoop/data/user-logs.txt",
-            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin12"
+            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin13"
         };  
 		
-		exec(new StreamingRepartitionJoin(), args);
+		exec(new StreamingRepartitionJoin(), args);  //////////////////////////////////////
 	}
 	
 	enum KeyFields{
@@ -76,7 +76,7 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		FileOutputFormat.setOutputPath(job, outputPath);
 		
 		if (job.waitForCompletion(true)){
-			setJobIdAndShowLog(job.getJobID().toString(), ShowLogType.IDENTITY);
+			setJobIdAndShowLog(job.getJobID().toString(), ShowLogType.IDENTITY); //////////////////
 			return 0;
 		}
 		return 1;
