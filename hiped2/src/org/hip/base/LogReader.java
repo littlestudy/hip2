@@ -1,6 +1,7 @@
 package org.hip.base;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,10 +28,14 @@ public class LogReader extends Configured implements Tool{
 	private static final Log LOG = LogFactory.getLog(LogReader.class); 	
 	private StringBuilder sb = new StringBuilder();
 	private FileSystem fileSystem;
-	private int waitingTime = 5;
+	private int waitingTime = 10;
 	
 	public enum ShowLogType{
 		NO, FULL, IDENTITY
+	}
+	
+	public enum JobState{
+		NONE, SUCCESS, FAILURE
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -38,8 +43,8 @@ public class LogReader extends Configured implements Tool{
 		System.exit(res);
 	}
 	
-	public static String getJobIdInfo(String jobId, ShowLogType show){
-		return jobId + LOCAL_JOBID_SEPATATOR + show.toString();
+	public static String getJobIdInfo(String jobId, JobState jobState, ShowLogType show){
+		return jobId + LOCAL_JOBID_SEPATATOR + jobState.toString() + LOCAL_JOBID_SEPATATOR + show.toString();
 	}
 	
 	@Override
@@ -47,10 +52,16 @@ public class LogReader extends Configured implements Tool{
 		BufferedReader reader = null;		
 		try {
 			reader = new BufferedReader(new FileReader(LOCAL_JOBID_FILE));
-			String [] parts = reader.readLine().split(LOCAL_JOBID_SEPATATOR);
-			String jobId = parts[0];
-			ShowLogType showType = ShowLogType.valueOf(parts[1]);
-			showLog(jobId, showType);
+			String infoStr = reader.readLine();
+			if (infoStr == null){
+				showLog(null, JobState.NONE, null);
+			} else {				
+				String [] parts = infoStr.split(LOCAL_JOBID_SEPATATOR);
+				String jobId = parts[0];
+				JobState jobState = JobState.valueOf(parts[1]);
+				ShowLogType showType = ShowLogType.valueOf(parts[2]);
+				showLog(jobId, jobState, showType);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -59,7 +70,28 @@ public class LogReader extends Configured implements Tool{
 		return 0;
 	}
 
-	private void showLog(String jobId, ShowLogType show) throws Exception {
+	private void showLog(String jobId, JobState jobState, ShowLogType show) throws Exception {
+		
+		switch (jobState) {
+		case SUCCESS:
+			showInfo(jobId, show);
+			break;
+		case FAILURE:
+		case NONE:
+			addInfo("Job fails.");
+			setAllInfo();
+			break;
+		//case NONE:
+			//addInfo("Job did not run.");
+			//setAllInfo();
+			//break;
+		default:
+			throw new Exception("Job's state is illegal.");
+		}		
+	}
+
+	private void showInfo(String jobId, ShowLogType show) throws IOException,
+			Exception, FileNotFoundException, InterruptedException {
 		Path logDir = new Path(LOG_DIR_ROOT + LOG_PREIFX + jobId.substring(3));
 		
 		fileSystem = logDir.getFileSystem(getConf());		

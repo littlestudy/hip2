@@ -7,11 +7,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.hip.base.LogReader.JobState;
 import org.hip.base.LogReader.ShowLogType;
 
 public abstract class BaseMapReduce extends Configured implements Tool{
@@ -20,6 +23,7 @@ public abstract class BaseMapReduce extends Configured implements Tool{
 		
 	public static String jobId_;
 	public static ShowLogType show_;
+	public static JobState jobState_;
 	
 	public BaseMapReduce(Class<?> cls){
 		LOG = LogFactory.getLog(cls);
@@ -31,20 +35,25 @@ public abstract class BaseMapReduce extends Configured implements Tool{
 	
 	public static void exec(Tool tool, String[] args) throws Exception{
 		int res = ToolRunner.run(new Configuration(), tool, args);
-		saveJobId(jobId_, show_);
+		saveJobId(jobId_, jobState_, show_);
 		System.exit(res);
 	}
 	
-	public void setJobIdAndShowLog(String jobId, ShowLogType show){
-		jobId_ = jobId;
+	public void setJobIdAndShowLog(Job job, JobState jobState, ShowLogType show){		
+		jobId_ = job.getJobID().toString();
+		jobState_ = jobState;
 		show_ = show;
 	}
 	
-	public static void saveJobId(String jobId, ShowLogType show){
+	public void removeHdfsFile(Path path) throws IOException{
+		path.getFileSystem(getConf()).delete(path, true);
+	}
+	
+	public static void saveJobId(String jobId, JobState jobState, ShowLogType show){
 		PrintStream ps = null;
 		try {
 			ps = new PrintStream(LogReader.LOCAL_JOBID_FILE);
-			ps.println(LogReader.getJobIdInfo(jobId, show));
+			ps.println(LogReader.getJobIdInfo(jobId, jobState, show));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

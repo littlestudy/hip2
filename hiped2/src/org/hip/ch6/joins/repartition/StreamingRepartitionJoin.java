@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.hip.base.BaseMapReduce;
+import org.hip.base.LogReader.JobState;
 import org.hip.base.LogReader.ShowLogType;
 import org.hip.ch6.joins.User;
 import org.hip.ch6.joins.UserLog;
@@ -30,7 +31,7 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		args = new String[] {
             "hdfs://master:9000/user/hadoop/data/users.txt",
             "hdfs://master:9000/user/hadoop/data/user-logs.txt",
-            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin7"
+            "hdfs://master:9000/user/hadoop/output/StreamingRepartitionJoin10"
         };  
 		
 		exec(new StreamingRepartitionJoin(), args);  //////////////////////////////////////
@@ -76,7 +77,7 @@ public class StreamingRepartitionJoin extends BaseMapReduce{
 		FileOutputFormat.setOutputPath(job, outputPath);
 		
 		if (job.waitForCompletion(true)){
-			setJobIdAndShowLog(job.getJobID().toString(), ShowLogType.IDENTITY); //////////////////
+			setJobIdAndShowLog(job, JobState.SUCCESS, ShowLogType.IDENTITY); //////////////////
 			return 0;
 		}
 		return 1;
