@@ -1,6 +1,7 @@
 package org.hip.base;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -29,6 +30,7 @@ public class LogReader extends Configured implements Tool{
 	private StringBuilder sb = new StringBuilder();
 	private FileSystem fileSystem;
 	private int waitingTime = 10;
+	private String jobIdStr;
 	
 	public enum ShowLogType{
 		NO, FULL, IDENTITY
@@ -49,15 +51,22 @@ public class LogReader extends Configured implements Tool{
 	
 	@Override
 	public int run(String[] args) throws Exception {
-		BufferedReader reader = null;		
+		BufferedReader reader = null;	
+		File localJobIdFile = new File(LOCAL_JOBID_FILE);
+		if (!localJobIdFile.exists()){
+			showLog(null, JobState.NONE, null);
+			return 1;
+		}
+		
 		try {
-			reader = new BufferedReader(new FileReader(LOCAL_JOBID_FILE));
+			reader = new BufferedReader(new FileReader(localJobIdFile));
 			String infoStr = reader.readLine();
 			if (infoStr == null){
 				showLog(null, JobState.NONE, null);
 			} else {				
 				String [] parts = infoStr.split(LOCAL_JOBID_SEPATATOR);
 				String jobId = parts[0];
+				jobIdStr = jobId;
 				JobState jobState = JobState.valueOf(parts[1]);
 				ShowLogType showType = ShowLogType.valueOf(parts[2]);
 				showLog(jobId, jobState, showType);
@@ -66,6 +75,7 @@ public class LogReader extends Configured implements Tool{
 			e.printStackTrace();
 		} finally {
 			IOUtils.closeStream(reader);
+			localJobIdFile.renameTo(new File(localJobIdFile.getPath() + "__" + jobIdStr));
 		}
 		return 0;
 	}
@@ -171,6 +181,6 @@ public class LogReader extends Configured implements Tool{
 	}
 	
 	private void setAllInfo(){
-		LOG.info("log info \n\n" + sb.toString());		
+		LOG.info(" === JOB [ " + jobIdStr + " ] log info === \n" + sb.toString());		
 	}
 }
