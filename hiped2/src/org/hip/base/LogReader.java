@@ -79,6 +79,10 @@ public class LogReader extends Configured implements Tool{
 		}
 		return 0;
 	}
+	
+	public void showInfo(String info){
+		LOG.info(LOG_IDENTITY + info);
+	}
 
 	private void showLog(String jobId, JobState jobState, ShowLogType show) throws Exception {
 		
