@@ -2,7 +2,7 @@
 
 	<!--<property name="job-class" value="org.hiped2.ch3.csv.CSVMapReduce"/>-->
 	
-	<property name="job-class" value=" org.hip.ch6.sort.secondary.SortMapReduce"/>
+	<property name="job-class" value=" org.hip.ch6.sort.total.TotalSortMapReduce"/>
 									 
 	<property name="hadoop-home" value="D:\develop\hadoop-2.6.0"/>
 	

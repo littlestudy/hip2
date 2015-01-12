@@ -20,7 +20,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class LogReader extends Configured implements Tool{	
 	
-	public static final String LOG_IDENTITY = "[ --- marked info --- ]";
+	public static final String LOG_IDENTITY = "[ --- marked info --- ] ";
 	public static final String LOG_DIR_ROOT = "hdfs://master:9000/tmp/logs/hadoop/logs/";
 	public static final String LOG_PREIFX = "application";
 	public static final String LOCAL_JOBID_FILE = "/tmp/jobInfo";

@@ -78,7 +78,7 @@
 	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/hdfs/hadoop-hdfs-nfs-2.6.0.jar"/>
 	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-app-2.6.0.jar"/>
 	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-common-2.6.0.jar"/>
-	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.6.0.jar"/>
+	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-core-2.6.0.jar" sourcepath="D:/develop/hadoop-2.6.0-src"/>
 	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-hs-2.6.0.jar"/>
 	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-hs-plugins-2.6.0.jar"/>
 	<classpathentry kind="lib" path="D:/develop/hadoop-2.6.0/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-2.6.0.jar"/>
